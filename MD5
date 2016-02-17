@@ -1,0 +1,14 @@
+a7bffaace608320687cff40625cfd635 *DESCRIPTION
+918990ecbb3986a8cbab3a154eb7dd51 *LICENSE
+5f77688383f748896d4704876a71f728 *NAMESPACE
+efcf80a2546ce649a2edac46cc18dc6f *R/rcbsubset-internal.R
+1d037fb04bdd6fc3ef1e5fb76c161841 *R/rcbsubset.R
+b4202257980bbdb6bad91b0ae7c8c330 *man/callrelax.Rd
+a450d694aea55d772b378a3801068855 *man/dist2net.Rd
+c41f4fe5479d8126cdde1b5dee0cea03 *man/rcbsubset-package.Rd
+e576f1ed0a5274cfcdea53f737069783 *man/rcbsubset.Rd
+d4109aaa2105b7b9153866e300b7d30a *tests/testthat.R
+4f8acfa428aa23a576652869e4b4d718 *tests/testthat/test-dist2net.R
+7da816d03ea8747a95f15861474a989c *tests/testthat/test-exclude_treated.R
+cda1577fb4abadb8dd3bba3c89f93cad *tests/testthat/test-penalty.R
+f87315f8c0410e7d251665d106890ec6 *tests/testthat/test-precision.R
