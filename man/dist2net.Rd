@@ -10,11 +10,13 @@
 Building and Manipulating Network Flow Problems
 }
 \description{
-These are internal rcbsubset methods not meant to be called directly by users.  They are used to construct a network flow problem from the information about a matching problem that is passed to the \code{rcbalance} method.}
+These are internal rcbsubset methods not meant to be called directly by users.  They are used to construct a network flow problem from the information about a matching problem that is passed to the \code{rcbsubset} method.}
 \usage{
-dist2net(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontrol = NULL)
+dist2net(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontrol = NULL,
+	tol = 1e-5)
 
-dist2net.matrix(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL)
+dist2net.matrix(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, 
+	tol = 1e-5)
 
 add.layer(net.layers, new.layer)
 
@@ -42,6 +44,9 @@ a nonnegative integer. The number of control units to which each treated unit wi
 \item{ncontrol}{
 	the total number of controls in the matching problem.  If left \code{NULL} the function will attempt to compute it by counting controls referenced in the distance object provided.
 }
+
+\item{tol}{
+	edge cost tolerance.  This is the smallest tolerated difference between matching costs.  It is used in these functions only when exclude.penalty is NULL, to choose a default penalty that is small enough not to cause integer overflows.}
 
   \item{net.layers}{
 	a layered network object of the type produced by the dist2net function.  

@@ -2,7 +2,8 @@
 	packageStartupMessage('optmatch (>= 0.9-1) needed to run the rcbsubset command.  Please load optmatch and agree to its academic license before calling rcbsubset.')	
 }
 
-dist2net.matrix <- function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL){
+dist2net.matrix <- function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, tol = 1e-5){
+	LARGE_PENALTY <- 1e6
 	ntreat <- nrow(dist.struct)
 	ncontrol <- ncol(dist.struct)
 		
@@ -93,6 +94,9 @@ if (inherits(dist.struct, 'InfinitySparseMatrix')){
 		
 		#if no exclusion penalty is given, set it to sum of ntreat largest t-c distances
 		if(is.null(exclude.penalty)) exclude.penalty <- sum(sort(cost, decreasing = TRUE)[1:ntreat])
+		max.penalty <- LARGE_PENALTY*tol
+		exclude.penalty <- min(max.penalty, exclude.penalty)
+		
 		ntreat.largest <- exclude.penalty
 		cost <- c(cost, rep(ntreat.largest, length(treat.idx)))
 	}
@@ -109,7 +113,8 @@ if (inherits(dist.struct, 'InfinitySparseMatrix')){
 
 
 dist2net <-
-function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontrol = NULL){
+function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontrol = NULL, tol = 1e-5){
+	LARGE_PENALTY <- 1e6
 	ntreat <- length(dist.struct)
 	if(is.null(ncontrol)) ncontrol <- max(laply(dist.struct, function(x) max(c(as.numeric(names(x)),0))))
 		
@@ -189,6 +194,9 @@ function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontr
 		
 		#if no exclusion penalty is given, set it to sum of ntreat largest t-c distances
 		if(is.null(exclude.penalty)) exclude.penalty <- sum(sort(cost, decreasing = TRUE)[1:ntreat])
+		max.penalty <- LARGE_PENALTY*tol
+		exclude.penalty <- min(max.penalty, exclude.penalty)
+				
 		ntreat.largest <- exclude.penalty
 		cost <- c(cost, rep(ntreat.largest, length(treat.idx)))
 	}

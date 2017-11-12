@@ -1,10 +1,10 @@
-c2977277dce79f595690435130aaeefa *DESCRIPTION
+b9dd35d342c8765ee229c366341f11de *DESCRIPTION
 918990ecbb3986a8cbab3a154eb7dd51 *LICENSE
 47622444a8631e5b829d60ebb312d4a6 *NAMESPACE
-efcf80a2546ce649a2edac46cc18dc6f *R/rcbsubset-internal.R
-1d037fb04bdd6fc3ef1e5fb76c161841 *R/rcbsubset.R
+55ef6447f590598addd40c304a9c6215 *R/rcbsubset-internal.R
+b39b3f66b84d05e9193268f6aaa5e6fa *R/rcbsubset.R
 b4202257980bbdb6bad91b0ae7c8c330 *man/callrelax.Rd
-a450d694aea55d772b378a3801068855 *man/dist2net.Rd
+78ea66bcfd9c4bf27cf818b9d1e6609e *man/dist2net.Rd
 c41f4fe5479d8126cdde1b5dee0cea03 *man/rcbsubset-package.Rd
 e576f1ed0a5274cfcdea53f737069783 *man/rcbsubset.Rd
 d4109aaa2105b7b9153866e300b7d30a *tests/testthat.R

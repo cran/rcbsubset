@@ -93,9 +93,9 @@ function(distance.structure, near.exact = NULL, fb.list = NULL, treated.info = N
 
 ######## SET UP TREATED-CONTROL PORTION OF NETWORK	#########
 	if (inherits(distance.structure, c('matrix', 'InfinitySparseMatrix'))) {
-		match.network <- dist2net.matrix(distance.structure,k, exclude.treated = exclude.treated, exclude.penalty)
+		match.network <- dist2net.matrix(distance.structure,k, exclude.treated = exclude.treated, exclude.penalty, tol)
 	} else if (!is.null(fb.list)){ #specify number of controls		
-		match.network <- dist2net(distance.structure,k, exclude.treated = exclude.treated, exclude.penalty, ncontrol = nrow(control.info))		
+		match.network <- dist2net(distance.structure,k, exclude.treated = exclude.treated, exclude.penalty, ncontrol = nrow(control.info), tol)		
 	}else{
 		match.network <- dist2net(distance.structure,k, exclude.treated = exclude.treated, exclude.penalty)
 	}
