@@ -9,7 +9,7 @@ This function computes an optimal match with refined covariate balance.
 }
 \usage{
 rcbsubset(distance.structure, near.exact = NULL, fb.list = NULL, 
-treated.info = NULL, control.info = NULL, exclude.penalty = NULL, penalty = 3, tol = 1e-5)
+treated.info = NULL, control.info = NULL, exclude.penalty = NULL, penalty = 2, tol = 1e-3)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

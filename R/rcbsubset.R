@@ -1,5 +1,5 @@
 rcbsubset <-
-function(distance.structure, near.exact = NULL, fb.list = NULL, treated.info = NULL, control.info = NULL, exclude.penalty = NULL, penalty = 3, tol = 1e-5){
+function(distance.structure, near.exact = NULL, fb.list = NULL, treated.info = NULL, control.info = NULL, exclude.penalty = NULL, penalty = 2, tol = 1e-3){
 		
 ####################  CHECK INPUT #################### 
 	#allow treated units to be excluded
@@ -137,28 +137,32 @@ function(distance.structure, near.exact = NULL, fb.list = NULL, treated.info = N
     	cost <- intcost    		
 	}
 	if(any(is.na(as.integer(cost)))){
-		stop('Integer overflow in penalties!  Run with a higher tolerance, a lower penalty value, or fewer levels of fine balance.')
+		stop('Integer overflow in penalties!  Run with a higher tolerance or fewer balance and near-exact constraints.')
 	}
 	match.network$cost <- cost
 	o <- callrelax(match.network)	
-	if(o$feasible == 0){
-		stub.message <- 'Match is infeasible or penalties are too large for RELAX to process! Consider reducing penalty or raising tolerance'
+	if(o$feasible == 0 || o$crash == 1){
+		stub.message <- 'Match is infeasible or penalties are too large for RELAX to process! Consider raising tolerance or using fewer balance and near-exact constraints'
 		if(k > 1){	
 			#print()
 			stop(paste(stub.message, 'or reducing k.'))
 		}
 		if(!exclude.treated){
 			#print()
-			stop(paste(stub.message, ', or setting exclude.treated = TRUE.'))
+			stop('Match is infeasible or penalties are too large for RELAX to process! Try setting exclude.treated=TRUE, or raising tolerance or using fewer balance and near-exact constraints')
 		}
 		#print()
 		stop(paste(stub.message, '.', sep =''))
+	}
+	if('no.optmatch' %in% names(o)){
+		return(NULL)
 	}
 	
 	
 	#################### PREPARE OUTPUT #################### 	
 	#make a |T| x k matrix with rownames equal to index of treated unit and indices of its matched controls stored in each row
 	x <- o$x[1:match.network$tcarcs]	
+	if(all(x == 0)) warning('No matched pairs formed. Try using a higher exclusion penalty?')	
 	match.df <- data.frame('treat' = as.factor(match.network$startn[1:match.network$tcarcs]), 'x' = x, 'control' = match.network$endn[1:match.network$tcarcs])
 	matched.or.not <- daply(match.df, .(match.df$treat), function(treat.edges) c(as.numeric(as.character(treat.edges$treat[1])), sum(treat.edges$x)), .drop_o = FALSE)
 	if(any(matched.or.not[,2] == 0)){

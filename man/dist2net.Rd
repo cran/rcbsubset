@@ -13,10 +13,10 @@ Building and Manipulating Network Flow Problems
 These are internal rcbsubset methods not meant to be called directly by users.  They are used to construct a network flow problem from the information about a matching problem that is passed to the \code{rcbsubset} method.}
 \usage{
 dist2net(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontrol = NULL,
-	tol = 1e-5)
+	tol = 1e-3)
 
 dist2net.matrix(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, 
-	tol = 1e-5)
+	tol = 1e-3)
 
 add.layer(net.layers, new.layer)
 

@@ -2,8 +2,8 @@
 	packageStartupMessage('optmatch (>= 0.9-1) needed to run the rcbsubset command.  Please load optmatch and agree to its academic license before calling rcbsubset.')	
 }
 
-dist2net.matrix <- function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, tol = 1e-5){
-	LARGE_PENALTY <- 1e6
+dist2net.matrix <- function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, tol = 1e-3){
+	#LARGE_PENALTY <- 1e6  #deprecated
 	ntreat <- nrow(dist.struct)
 	ncontrol <- ncol(dist.struct)
 		
@@ -52,9 +52,15 @@ if (inherits(dist.struct, 'InfinitySparseMatrix')){
     b <- z*k #give each treated unit a supply of k
     tcarcs <- length(startn)
 	
+	#drop min cost to zero to help keep size of distances small
+	cost <- cost - min(cost)
+	
+	
 	#set up penalty vector
 	
-	p <- max(cost)
+	#initialize p to max cost * the double square root of the inverse sparsity (to help ensure penalties are strong enough)
+	sparsity <- ntreat*ncontrol/tcarcs
+	p <- max(cost)*sqrt(sqrt(sparsity)) + 1
 	theta <- 2
 	S.i <- NULL
 	layers <- list()	
@@ -92,10 +98,14 @@ if (inherits(dist.struct, 'InfinitySparseMatrix')){
 		endn <- c(endn, ll.nodes)
 		ucap <- c(ucap, rep(1, length(treat.idx)))
 		
-		#if no exclusion penalty is given, set it to sum of ntreat largest t-c distances
-		if(is.null(exclude.penalty)) exclude.penalty <- sum(sort(cost, decreasing = TRUE)[1:ntreat])
-		max.penalty <- LARGE_PENALTY*tol
-		exclude.penalty <- min(max.penalty, exclude.penalty)
+		#
+		
+		#if no exclusion penalty is given, set it to value p
+		if(is.null(exclude.penalty)) exclude.penalty <- p
+		
+		#if(is.null(exclude.penalty)) exclude.penalty <- sum(sort(cost, decreasing = TRUE)[1:ntreat])  #deprecated, too big
+		#max.penalty <- LARGE_PENALTY*tol #deprecated
+		#exclude.penalty <- min(max.penalty, exclude.penalty)
 		
 		ntreat.largest <- exclude.penalty
 		cost <- c(cost, rep(ntreat.largest, length(treat.idx)))
@@ -113,8 +123,8 @@ if (inherits(dist.struct, 'InfinitySparseMatrix')){
 
 
 dist2net <-
-function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontrol = NULL, tol = 1e-5){
-	LARGE_PENALTY <- 1e6
+function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontrol = NULL, tol = 1e-3){
+	#LARGE_PENALTY <- 1e6 #deprecated
 	ntreat <- length(dist.struct)
 	if(is.null(ncontrol)) ncontrol <- max(laply(dist.struct, function(x) max(c(as.numeric(names(x)),0))))
 		
@@ -151,9 +161,13 @@ function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontr
     b <- z*k #give each treated unit a supply of k
     tcarcs <- length(startn)
 
+	cost <- cost - min(cost) 
+
 	#set up penalty vector
 	
-	p <- max(cost)
+	#initialize p to max cost * the double square root of the inverse sparsity (to help ensure penalties are strong enough)
+	sparsity <- ntreat*ncontrol/tcarcs
+	p <- max(cost)*sqrt(sqrt(sparsity)) + 1
 	theta <- 2
 	S.i <- NULL
 
@@ -192,10 +206,12 @@ function(dist.struct, k, exclude.treated = FALSE, exclude.penalty = NULL, ncontr
 		endn <- c(endn, ll.nodes)
 		ucap <- c(ucap, rep(1, length(treat.idx)))
 		
-		#if no exclusion penalty is given, set it to sum of ntreat largest t-c distances
-		if(is.null(exclude.penalty)) exclude.penalty <- sum(sort(cost, decreasing = TRUE)[1:ntreat])
-		max.penalty <- LARGE_PENALTY*tol
-		exclude.penalty <- min(max.penalty, exclude.penalty)
+		#if no exclusion penalty is given, set it to value p
+		if(is.null(exclude.penalty)) exclude.penalty <- p
+		
+		#if(is.null(exclude.penalty)) exclude.penalty <- sum(sort(cost, decreasing = TRUE)[1:ntreat])  #deprecated, too big
+		#max.penalty <- LARGE_PENALTY*tol #deprecated
+		#exclude.penalty <- min(max.penalty, exclude.penalty)
 				
 		ntreat.largest <- exclude.penalty
 		cost <- c(cost, rep(ntreat.largest, length(treat.idx)))
@@ -275,14 +291,16 @@ function(net.layers, new.layer){
 	}
 
 
-# WE NO LONGER TRACK bypass penalties by same system as fine balance penalties
+
+
+#WE NOW TRACK bypass penalties by same system as fine balance penalties again
 	#check if there are bypass edges from treated layer; if so update their penalties too
-#	if(any(startn[-c(1:tcarcs)] %in% which(z ==1)) && length(S.i) > 0){
-#		bypass.edges <- startn %in% which(z == 1)
-#		bypass.edges[1:tcarcs] <- FALSE
-#		new.byp.pen <- theta*max(S.i)
-#		cost[which(bypass.edges)] <- new.byp.pen
-#	}
+	if(any(startn[-c(1:tcarcs)] %in% which(z ==1)) && length(S.i) > 0){
+		bypass.edges <- startn %in% which(z == 1)
+		bypass.edges[1:tcarcs] <- FALSE
+		new.byp.pen <- theta*max(S.i)
+		cost[which(bypass.edges)] <- new.byp.pen
+	}
 
 	
 	#find parent nodes for nodes in current layer
@@ -425,32 +443,34 @@ function(net.layers, new.layer){
 
 
 callrelax <- function (net) {
-	if (!requireNamespace("optmatch", quietly = TRUE)) {
-	  stop('Error: package optmatch (>= 0.9-1) not loaded.  To run rcbalance command, you must install optmatch first and agree to the terms of its license.')
-	}
-    	startn <- net$startn
-    	endn <- net$endn
-    	ucap <- net$ucap
-    	b <- net$b
-    	cost <- net$cost
-    	stopifnot(length(startn) == length(endn))
-    	stopifnot(length(startn) == length(ucap))
-    	stopifnot(length(startn) == length(cost))
-    	stopifnot(min(c(startn, endn)) >= 1)
-    	stopifnot(max(c(startn, endn)) <= length(b))
-    	stopifnot(all(startn != endn))
-
-    	nnodes <- length(b)
-    my.expr <- parse(text = '.Fortran("relaxalg", nnodes, as.integer(length(startn)), 
-    	    as.integer(startn), as.integer(endn), as.integer(cost), 
-    	    as.integer(ucap), as.integer(b), x1 = integer(length(startn)), 
-    	    crash1 = as.integer(0), large1 = as.integer(.Machine$integer.max/4), 
-    	    feasible1 = integer(1), NAOK = FALSE, DUP = TRUE, PACKAGE = "optmatch")')
-	fop <- eval(my.expr)	
-   	x <- fop$x1
-    	feasible <- fop$feasible1
-    	crash <- fop$crash1
-    	list(crash = crash, feasible = feasible, x = x)
+	if (requireNamespace("optmatch", quietly = TRUE)) {
+		startn <- net$startn
+	    	endn <- net$endn
+	    	ucap <- net$ucap
+	    	b <- net$b
+	    	cost <- net$cost
+	    	stopifnot(length(startn) == length(endn))
+	    	stopifnot(length(startn) == length(ucap))
+	    	stopifnot(length(startn) == length(cost))
+	    	stopifnot(min(c(startn, endn)) >= 1)
+	    	stopifnot(max(c(startn, endn)) <= length(b))
+	    	stopifnot(all(startn != endn))
+	
+	    	nnodes <- length(b)
+	    my.expr <- parse(text = '.Fortran("relaxalg", nnodes, as.integer(length(startn)), 
+	    	    as.integer(startn), as.integer(endn), as.integer(cost), 
+	    	    as.integer(ucap), as.integer(b), x1 = integer(length(startn)), 
+	    	    crash1 = as.integer(0), large1 = as.integer(.Machine$integer.max/4), 
+	    	    feasible1 = integer(1), NAOK = FALSE, DUP = TRUE, PACKAGE = "optmatch")')
+		fop <- eval(my.expr)	
+	   	x <- fop$x1
+	    	feasible <- fop$feasible1
+	    	crash <- fop$crash1
+		return(list(crash = crash, feasible = feasible, x = x))
+	} else {
+			  warning('Package optmatch (>= 0.9-1) not loaded, so rcbsubset could not perform the usual match; returning NULL.')
+		return(list(crash = 0, feasible = 1, x = rep(0, length(cost)), no.optmatch = TRUE))		
+    }
 }
 
 penalty.update <-
@@ -464,14 +484,14 @@ function(net.layers, newtheta, newp = NA){
 	for(i in c(1:length(oldpen))){
 		newcost[which(oldcost == round(oldpen[i]))] <- newpen[i]
 	}
-	## WE don't update exclusion penalties automatically any more.
+	#WE now update exclusion penalties automatically again
 	#check if there are bypass edges from treated layer; if so update their penalties too
-#	if(any(net.layers$startn[-c(1:net.layers$tcarcs)] %in% which(net.layers$z ==1))){
-#		bypass.edges <- net.layers$startn %in% which(net.layers$z == 1)
-#		bypass.edges[1:net.layers$tcarcs] <- FALSE
-#		new.byp.pen <- newtheta*max(newpen)
-#		newcost[which(bypass.edges)] <- new.byp.pen
-#	}	
+	if(any(net.layers$startn[-c(1:net.layers$tcarcs)] %in% which(net.layers$z ==1))){
+		bypass.edges <- net.layers$startn %in% which(net.layers$z == 1)
+		bypass.edges[1:net.layers$tcarcs] <- FALSE
+		new.byp.pen <- newtheta*max(newpen)
+		newcost[which(bypass.edges)] <- new.byp.pen
+	}	
 	net.layers$cost <- newcost
 	net.layers$penalties <- newpen
 	net.layers$theta <- newtheta
@@ -486,20 +506,27 @@ penalize.near.exact <- function(net.layers, near.exact){
 	theta <- net.layers$theta
 	z <- net.layers$z
 	
+	oldmax <- max(net.layers$penalties,0)
+
+	if(oldmax == 0){
+		near.exact.pen <- net.layers$p #if no other penalties are already present, just use initial suggested penalty
+	}else{
+		#if balance penalties are present, make near-exact penalty larger by a factor of double-square-root the inverse sparsity
+		sparsity <- prod(table(net.layers$z))/net.layers$tcarcs
+		near.exact.pen <- sqrt(sqrt(sparsity))*oldmax + 1
+	}
+
 	newcost <- oldcost
+	newcost[which(near.exact[startn] != near.exact[endn])] <- newcost[which(near.exact[startn] != near.exact[endn])] + near.exact.pen
+	
+	#if there are bypass edges, need to make their penalties bigger so units don't get excluded instead of matched
 	if(any(startn[-c(1:tcarcs)] %in% which(z ==1))){	
 		bypass.edges <- startn %in% which(z == 1)
 		bypass.edges[1:tcarcs] <- FALSE
-		old.byp.pen <- oldcost[which(bypass.edges)[1]]
-		newcost[which(bypass.edges)] <- old.byp.pen*theta
-		near.exact.pen <- old.byp.pen
-	}else{
-		near.exact.pen <- theta*max(net.layers$penalties,0)
-		#correct penalty if net.layers$penalties was empty
-		if(near.exact.pen == 0) near.exact.pen <- theta*net.layers$p
+		newcost[which(bypass.edges)] <- near.exact.pen*theta
 	}
-	newcost[which(near.exact[startn] != near.exact[endn])] <- newcost[which(near.exact[startn] != near.exact[endn])] + near.exact.pen
-	net.layers$cost <- newcost
+
+	net.layers$cost <- newcost	
 	return(net.layers)
 }
 
