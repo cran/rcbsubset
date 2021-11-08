@@ -2,5 +2,6 @@ export(rcbsubset)
 exportPattern("^[[:alpha:]]+")
 importFrom("stats", "as.formula", "binomial", "cov", "glm.fit",
              "mahalanobis", "model.matrix", "sd", "var")
+importFrom("rcbalance", "rcbalance")
 import(MASS)
 import(plyr)

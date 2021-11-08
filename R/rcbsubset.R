@@ -1,11 +1,18 @@
 rcbsubset <-
-function(distance.structure, near.exact = NULL, fb.list = NULL, treated.info = NULL, control.info = NULL, exclude.penalty = NULL, penalty = 2, tol = 1e-3){
+function(distance.structure, near.exact = NULL, fb.list = NULL, 
+         treated.info = NULL, control.info = NULL, exclude.penalty = NULL,
+         penalty = 2, tol = 1e-3){
 		
 ####################  CHECK INPUT #################### 
 	#allow treated units to be excluded
 	exclude.treated = TRUE
 	target.group <- NULL
 	k = 1
+	if(is.null(exclude.penalty)){
+	  return(rcbalance::rcbalance(distance.structure, near.exact, fb.list,
+	                   treated.info, control.info, exclude.treated,
+	                   target.group, k, penalty, tol))
+	}
 	if(!(penalty > 1)){
 		stop("penalty argument must be greater than 1")
 	}
@@ -93,7 +100,9 @@ function(distance.structure, near.exact = NULL, fb.list = NULL, treated.info = N
 
 ######## SET UP TREATED-CONTROL PORTION OF NETWORK	#########
 	if (inherits(distance.structure, c('matrix', 'InfinitySparseMatrix'))) {
-		match.network <- dist2net.matrix(distance.structure,k, exclude.treated = exclude.treated, exclude.penalty, tol)
+		match.network <- dist2net.matrix(distance.structure,k, 
+		                                 exclude.treated = exclude.treated, 
+		                                 exclude.penalty, tol)
 	} else if (!is.null(fb.list)){ #specify number of controls		
 		match.network <- dist2net(distance.structure,k, exclude.treated = exclude.treated, exclude.penalty, ncontrol = nrow(control.info), tol)		
 	}else{
@@ -108,8 +117,9 @@ function(distance.structure, near.exact = NULL, fb.list = NULL, treated.info = N
 				match.network <- add.layer(match.network, interact.factor)
 		}		
 	}
-		
-	match.network <- penalty.update(match.network, newtheta = penalty) 
+	
+	#DON'T NEED TO RUN THIS, add.layer handles all penalty issues.	
+	#match.network <- penalty.update(match.network, newtheta = penalty) 
 
 #################### ADD NEAR EXACT PENALTIES ######################
 	
