@@ -28,7 +28,8 @@ function(distance.structure, near.exact = NULL, fb.list = NULL,
 			stop('treated.info and control.info must have identical column names')
 		}	
 		treated.control.info <- rbind(treated.info, control.info)
-		if(class(distance.structure) %in% c('matrix', 'InfinitySparseMatrix', 'BlockedInfinitySparseMatrix')){		
+		if(any(class(distance.structure) %in% 
+		       c('matrix', 'InfinitySparseMatrix', 'BlockedInfinitySparseMatrix'))){		
 			if(nrow(treated.info) != nrow(distance.structure)){
 				stop('Dimensions of treated.info and distance.structure do not agree')
 			}
@@ -69,7 +70,8 @@ function(distance.structure, near.exact = NULL, fb.list = NULL,
 				stop('treated.info and control.info must have identical column names')
 			}	
 			target.control.info <- rbind(target.group, control.info)
-			if(class(distance.structure) %in% c('matrix', 'InfinitySparseMatrix', 'BlockedInfinitySparseMatrix')){		
+			if(any(class(distance.structure) %in% 
+			       c('matrix', 'InfinitySparseMatrix', 'BlockedInfinitySparseMatrix'))){		
 				if(nrow(target.group) != nrow(distance.structure)){
 					stop('target.group and distance.structure dimensions do not agree')
 				}

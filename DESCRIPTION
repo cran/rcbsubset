@@ -1,8 +1,8 @@
 Package: rcbsubset
 Type: Package
 Title: Optimal Subset Matching with Refined Covariate Balance
-Version: 1.1.5
-Date: 2021-10-15
+Version: 1.1.6
+Date: 2022-2-28
 Author: Samuel D. Pimentel
 Maintainer: Samuel D. Pimentel <spi@berkeley.edu>
 Description: Tools for optimal subset matching of treated units
@@ -12,12 +12,16 @@ Description: Tools for optimal subset matching of treated units
 	relative is the 'rcbalance' package.  See Pimentel, 
 	et al.(2015) <doi:10.1080/01621459.2014.997879>
 	and Pimentel and Kelz (2020) 
-	<doi:10.1080/01621459.2020.1720693>.
+	<doi:10.1080/01621459.2020.1720693>. The optmatch 
+	package, which is useful for running many of the provided
+	functions, may be downloaded from Github at 
+	<https://github.com/markmfredrickson/optmatch> if not available
+	on CRAN.
 Depends: R (>= 3.2.0), MASS, plyr
 Imports: rcbalance
 License: MIT + file LICENSE
 Suggests: optmatch, testthat
 NeedsCompilation: no
-Packaged: 2021-11-08 21:30:25 UTC; sdbpimentel
+Packaged: 2022-03-02 17:17:19 UTC; sdbpimentel
 Repository: CRAN
-Date/Publication: 2021-11-08 22:50:02 UTC
+Date/Publication: 2022-03-03 00:20:02 UTC

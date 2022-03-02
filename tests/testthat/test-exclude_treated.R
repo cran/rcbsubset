@@ -1,6 +1,7 @@
 library(rcbalance)
 library(rcbsubset)
-library(optmatch)
+if (requireNamespace("optmatch", quietly = TRUE)){
+  library(optmatch)
 context('Excluding treated units')
 
 data(nuclearplants)
@@ -34,3 +35,4 @@ test_that('Matches with one pair are returned correctly', {
 	expect_equal(rownames(match.out$matches), '1')
 	expect_equal(dim(match.out$fb.tables[[1]]), c(1,2))
 })
+}

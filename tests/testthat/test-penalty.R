@@ -1,6 +1,7 @@
 library(rcbalance)
 library(rcbsubset)
-library(optmatch)
+if (requireNamespace("optmatch", quietly = TRUE)){
+  library(optmatch)
 context('Setting network penalties')
 
 data(nuclearplants)
@@ -37,4 +38,4 @@ test_that('penalize.near.exact changes appropriate part of matching network', {
 	expect_equal(match.net$cost[-c(1:match.net$tcarcs)], 
 	  match.net2$cost[-c(1:match.net2$tcarcs)])		
 })
-
+}

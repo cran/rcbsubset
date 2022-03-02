@@ -7,7 +7,9 @@ set.seed(2018 - 5 - 16)
 
 dist.mat <- matrix(100*(runif(10*30)),nrow = 10)
 
+if (requireNamespace("optmatch", quietly = TRUE)){
 test_that('Default penalties do not exclude more than absolutely necessary', {
 	match.out <- rcbsubset(dist.mat, exclude.penalty = NULL) 	
 	expect_equal(nrow(match.out$matches), nrow(dist.mat))
 })
+}
