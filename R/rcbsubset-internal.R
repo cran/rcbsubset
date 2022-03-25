@@ -1,6 +1,3 @@
-.onAttach <- function(libname, pkgname){
-	packageStartupMessage('optmatch (>= 0.9-1) needed to run the rcbsubset command.  Please load optmatch and agree to its academic license before calling rcbsubset.')	
-}
 
 dist2net.matrix <- function(dist.struct, k, exclude.treated = FALSE, 
                             exclude.penalty = NULL, tol = 1e-3){
@@ -439,37 +436,6 @@ function(net.layers, new.layer){
 	net.layers
 }
 
-
-callrelax <- function (net) {
-	if (requireNamespace("optmatch", quietly = TRUE)) {
-		startn <- net$startn
-	    	endn <- net$endn
-	    	ucap <- net$ucap
-	    	b <- net$b
-	    	cost <- net$cost
-	    	stopifnot(length(startn) == length(endn))
-	    	stopifnot(length(startn) == length(ucap))
-	    	stopifnot(length(startn) == length(cost))
-	    	stopifnot(min(c(startn, endn)) >= 1)
-	    	stopifnot(max(c(startn, endn)) <= length(b))
-	    	stopifnot(all(startn != endn))
-	
-	    	nnodes <- length(b)
-	    my.expr <- parse(text = '.Fortran("relaxalg", nnodes, as.integer(length(startn)), 
-	    	    as.integer(startn), as.integer(endn), as.integer(cost), 
-	    	    as.integer(ucap), as.integer(b), x1 = integer(length(startn)), 
-	    	    crash1 = as.integer(0), large1 = as.integer(.Machine$integer.max/4), 
-	    	    feasible1 = integer(1), NAOK = FALSE, DUP = TRUE, PACKAGE = "optmatch")')
-		fop <- eval(my.expr)	
-	   	x <- fop$x1
-	    	feasible <- fop$feasible1
-	    	crash <- fop$crash1
-		return(list(crash = crash, feasible = feasible, x = x))
-	} else {
-			  warning('Package optmatch (>= 0.9-1) not loaded, so rcbsubset could not perform the usual match; returning NULL.')
-		return(list(crash = 0, feasible = 1, x = rep(0, length(cost)), no.optmatch = TRUE))		
-    }
-}
 
 penalty.update <-
 function(net.layers, newtheta, newp = NA){

@@ -1,7 +1,7 @@
 rcbsubset <-
 function(distance.structure, near.exact = NULL, fb.list = NULL, 
          treated.info = NULL, control.info = NULL, exclude.penalty = NULL,
-         penalty = 2, tol = 1e-3){
+         penalty = 2, tol = 1e-3, solver = 'rlemon'){
 		
 ####################  CHECK INPUT #################### 
 	#allow treated units to be excluded
@@ -152,8 +152,8 @@ function(distance.structure, near.exact = NULL, fb.list = NULL,
 		stop('Integer overflow in penalties!  Run with a higher tolerance or fewer balance and near-exact constraints.')
 	}
 	match.network$cost <- cost
-	o <- callrelax(match.network)	
-	if(o$feasible == 0 || o$crash == 1){
+	o <- rcbalance::callrelax(match.network, solver = solver)
+	if(o$feasible == 0){
 		stub.message <- 'Match is infeasible or penalties are too large for RELAX to process! Consider raising tolerance or using fewer balance and near-exact constraints'
 		if(k > 1){	
 			#print()
@@ -166,10 +166,7 @@ function(distance.structure, near.exact = NULL, fb.list = NULL,
 		#print()
 		stop(paste(stub.message, '.', sep =''))
 	}
-	if('no.optmatch' %in% names(o)){
-		return(NULL)
-	}
-	
+
 	
 	#################### PREPARE OUTPUT #################### 	
 	#make a |T| x k matrix with rownames equal to index of treated unit and indices of its matched controls stored in each row

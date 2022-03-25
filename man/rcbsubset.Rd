@@ -9,7 +9,8 @@ This function computes an optimal match with refined covariate balance.
 }
 \usage{
 rcbsubset(distance.structure, near.exact = NULL, fb.list = NULL, 
-treated.info = NULL, control.info = NULL, exclude.penalty = NULL, penalty = 2, tol = 1e-3)
+treated.info = NULL, control.info = NULL, exclude.penalty = NULL, 
+penalty = 2, tol = 1e-3, solver = 'rlemon')
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -44,12 +45,18 @@ a nonnegative value.  This is a tuning parameter that helps ensure the different
 \item{tol}{
 	edge cost tolerance.  This is the smallest tolerated difference between matching costs; cost differences smaller than this will be considered zero.  Match distances will be scaled by inverse tolerance, so when matching with large edge costs or penalties the tolerance may need to be increased.
 }
+
+
+\item{solver}{
+the name of the package used to solve the network flow optimization problem underlying the match, one of 'rlemon' (which uses the Lemon Optimization Library) and 'rrelaxiv' (which uses the RELAX-IV algorithm). 
+}
+
 }
 
 \details{
-In order to perform matching, \code{rcbalance} requires the user to load the \code{optmatch} (>= 0.9-1) package separately.  The manual loading is required due to software license issues.  If the package is not loaded the \code{rcbalance} command will fail with an error saying the \code{optmatch} package is not present.  
-
-The second reference below gives background on \code{optmatch}.
+To use the option \code{solver = 'rrelaxiv'}, the user must install the
+\code{rrelaxiv} manually; it is not hosted on CRAN because it carries an academic
+license.  
 }
 \value{
 A list with the following components:
@@ -59,10 +66,10 @@ A list with the following components:
 %% ...
 }
 \references{
- Hansen, B.B. and Klopfer, S.O. (2006) Optimal full matching and
-  related designs via network flows, JCGS 15 609-627.
   
 Pimentel, S.D., Kelz, R.R., Silber, J.H., and Rosenbaum, P.R. (2015) Large, sparse optimal matching with refined covariate balance in an observational study of the health outcomes produced by new surgeons, JASA 110 (510), 515-527.	
+
+ Pimentel, S.D., and Kelz, R.R. (2020). Optimal tradeoffs in matched designs comparing US-trained and internationally trained surgeons. JASA 115 (532), 1675-1688.
 	
   Rosenbaum, P.R. (2012) Optimal matching of an optimally chosen subset in observational studies, JCGS 21.1: 57-71.  
 }
@@ -80,6 +87,7 @@ Samuel D. Pimentel
 %}
 \examples{
 
+\dontrun{
 library(optmatch)	
 data(nuclearplants)
 
@@ -101,7 +109,7 @@ rcbsubset(my.dist.matrix, fb.list = list('ne'),
  treated.info = nuclearplants[which(nuclearplants$pr ==1),],
  control.info = nuclearplants[which(nuclearplants$pr == 0),], exclude.penalty = 1.5)
 
-\dontrun{
+
 #match using distance objects created by rcbalance package
 library(rcbalance)
 
